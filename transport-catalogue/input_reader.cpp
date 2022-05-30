@@ -2,187 +2,165 @@
 
 using namespace transport_catalogue;
 
-InputReader::InputReader(std::vector<std::string>& datas, std::vector<std::string>& answers)
+void InputReader::FillTransportCatalogue(transport_catalogue::TransportCatalogue& tc)
 {
-	SplitRequest(datas, answers);
-}
+	CinRequest();
 
-std::pair<std::vector<Stop>, std::vector<Bus>> InputReader::CreateData()
-{
-	return {stop_request_, bus_request_};
-}
-
-std::unordered_map<std::string, std::unordered_map<std::string, size_t>> InputReader::CreateDistances()
-{
-	return distances_between_stops_;
-}
-
-std::vector<std::pair<std::string, std::string>> InputReader::CreateAnswer()
-{
-	return answer_request_;
-}
-
-void InputReader::SplitRequest(std::vector<std::string>& datas, std::vector<std::string>& answers)
-{
-	using namespace std;
-
-	for (auto& s : datas)
+	for (const auto& stop : stop_request_)
 	{
-		SplitDataRequest(s);
+		tc.AddStop(stop);
 	}
 
-	for (auto& s : answers)
+	for (const auto& bus : bus_request_)
 	{
-		SplitAnswerRequest(s);
+		tc.AddBus(bus);
+	}
+
+	for (const auto& [stop_name, other_stops] : distances_between_stops_)
+	{
+		for(const auto& [other_stop_name, distance] : other_stops)
+		tc.SetDistances(stop_name, other_stop_name, distance);
+	}
+}
+
+void InputReader::CinRequest()
+{
+	int data_count;
+	std::string s;
+	std::cin >> data_count;
+	for (int i = 0; i < data_count + 1; ++i)
+	{
+		std::getline(std::cin, s);
+		SplitDataRequest(s);
 	}
 }
 
 void InputReader::SplitDataRequest(std::string& st)
 {
-	
 	// if string is bus
 	if (st[0] == 'B' && st[1] == 'u' && st[2] == 's' && st[3] == ' ')
 	{
 		st = st.substr(4);
-		Bus bus;
-		
-		// get name of bus
-		int i = 0;
-		std::string new_name = "";
-		while (st[i] != ':')
-		{
-			new_name += st[i++];
-		}
-		EraseSpaces(new_name);
-		bus.name = move(new_name);
-
-		// get bus stops
-		i += 2;
-		bool circle_route = false;
-		while (i < st.size())
-		{
-			// add new stop
-			new_name = ""; 
-			while (st[i] != '-' && st[i] != '>' && i < st.size())
-			{
-				new_name += st[i++];
-				if (st[i] == '>')
-				{
-					circle_route = true;
-				}
-			}
-			EraseSpaces(new_name);
-			Stop* stop = new Stop;
-			stop->name = new_name;
-			bus.route.push_back(stop);
-
-			i += 2;
-		}//*/
-		if (!circle_route)
-		{
-			int j = bus.route.size() - 1;
-			while (j--)
-			{
-				bus.route.push_back(bus.route.at(j));
-			}
-		}
-		bus_request_.push_back(bus);
+		bus_request_.push_back(IsBusOfDataRequest(st));
 	}
 
 	// if string is stop
 	if (st[0] == 'S' && st[1] == 't' && st[2] == 'o' && st[3] == 'p' && st[4] == ' ')
 	{
 		st = st.substr(5);
-		Stop stop;
-
-		// get name of stop
-		int i = 0;
-		std::string new_name = "";
-		while (st[i] != ':')
-		{
-			new_name += st[i++];
-		}
-		EraseSpaces(new_name);
-		stop.name = move(new_name);
-		
-		// get lat-coordinate of stop
-		new_name = "";
-		i += 2;
-		while (st[i] != ',')
-		{
-			new_name += st[i++];
-		}
-		if (new_name.size() > 3)
-		{
-			new_name += '0';
-		}
-		EraseSpaces(new_name); 
-		stop.coordinates.lat = std::stod(move(new_name));
-
-		// get lng-coordinate of stop
-		new_name = "";
-		i += 2;
-		while (st[i] != ',' && i < st.size())
-		{
-			new_name += st[i++];
-		}
-		if (new_name.size() > 3)
-		{
-			new_name += '0';
-		}
-		EraseSpaces(new_name); 
-		stop.coordinates.lng = std::stod(move(new_name));//*/
-
+		Stop stop = IsStopOfDataRequest(st);
 		stop_request_.push_back(stop);
 
-		// get distances to stops
-		i += 2;
-		while (i < st.size())
+		// get distances to neighboring stops if they exist
+		while (!st.empty())
 		{
-			size_t distance = 0;
-			new_name = "";
-			std::string other_stop = "";
-			while (st[i] != 'm')
-			{
-				new_name += st[i++];
-			}
-			EraseSpaces(new_name);
-			distance = static_cast<size_t>(std::stoi(move(new_name)));
-			if (i + 4 >= st.size() || (st[i + 1] != ' ' && st[i + 2] != 't' && st[i + 3] != 'o' && st[i + 4] != ' '))
-			{
-				std::cout << "Distances: Something went wrong" << std::endl;
-			}
-			else
-			{
-				new_name = "";
-				i += 5;
-				while (st[i] != ',' && i < st.size())
-				{
-					new_name += st[i++];
-				}
-				EraseSpaces(new_name);
-				other_stop = move(new_name);
-			}
-			distances_between_stops_[stop.name][other_stop] = distance;
-			i += 2;
-		}
+			st = st.substr(1);
+			auto [other_stop_name, distance] = move(AreDistance(st));
+			distances_between_stops_[stop.name][other_stop_name] = distance;
+		}//*/
 	}
 }
 
-void InputReader::SplitAnswerRequest(std::string& st)
+Bus InputReader::IsBusOfDataRequest(std::string& st)
 {
-	if (st[0] == 'B' && st[1] == 'u' && st[2] == 's' && st[3] == ' ')
+	Bus bus;
+
+	// get name of bus
+	bus.name = move(GetNameOfRequest(st, ':'));
+	st = st.substr(1);
+
+	// check circle route
+	char type_route;
+	if (std::find(st.begin(), st.end(), '>') != st.end())
 	{
-		st = st.substr(4);
-		EraseSpaces(st);
-		answer_request_.push_back({ "bus", st });
+		type_route = '>'; // circle route
 	}
-	if (st[0] == 'S' && st[1] == 't' && st[2] == 'o' && st[3] == 'p' && st[4] == ' ')
+	else if (std::find(st.begin(), st.end(), '-') != st.end())
+	{
+		type_route = '-'; // not circle route
+	}
+	else
+	{
+		std::cout << "Definition of route: something went wrong" << std::endl;
+		assert(false);
+	}
+	
+	// add stops
+	while (!st.empty())
+	{
+		Stop* stop = new Stop;
+		stop->name = move(GetNameOfRequest(st, type_route));
+		if (!st.empty())
+		{
+			st = st.substr(1);
+		}
+		bus.route.push_back(stop);
+	}
+
+	// add stops because of not circle route
+	if (type_route == '-')
+	{
+		int j = bus.route.size() - 1;
+		while (j--)
+		{
+			bus.route.push_back(bus.route.at(j));
+		}
+	}
+	
+	return bus;
+}
+
+Stop InputReader::IsStopOfDataRequest(std::string& st)
+{
+	Stop stop;
+
+	// get name of bus
+	stop.name = move(GetNameOfRequest(st, ':'));
+	st = st.substr(1);
+
+	// get coordinates of stop
+	stop.coordinates.lat = std::stod(move(GetNameOfRequest(st, ',')));
+	st = st.substr(1);
+	stop.coordinates.lng = std::stod(move(GetNameOfRequest(st, ',')));
+
+	return stop;
+}
+
+std::pair<std::string, size_t> InputReader::AreDistance(std::string& st)
+{
+	// get distance
+	size_t distance = static_cast<size_t>(std::stoi(move(GetNameOfRequest(st, 'm'))));
+	if (st[0] == 'm' && st[1] == ' ' && st[2] == 't' && st[3] == 'o' && st[4] == ' ')
 	{
 		st = st.substr(5);
-		EraseSpaces(st);
-		answer_request_.push_back({ "stop", st });
 	}
+	else
+	{
+		std::cout << "Distances: Something went wrong" << std::endl;
+		assert(false);
+	}
+	
+	// get name of other stop
+	std::string other_stop = move(GetNameOfRequest(st, ','));
+	if (!st.empty())
+	{
+		st = st.substr(1);
+	}
+
+	return { other_stop, distance };
+}
+
+std::string InputReader::GetNameOfRequest(std::string& st, const char end_of_name)
+{
+	int i = 0;
+	std::string name = "";
+	while (st[i] != end_of_name && i < st.size())
+	{
+		name += st[i++];
+	}
+	st = st.substr(i);
+	EraseSpaces(name);
+	return name;
 }
 
 void InputReader::EraseSpaces(std::string& st)

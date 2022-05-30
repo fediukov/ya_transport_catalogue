@@ -34,32 +34,22 @@ Stop Samara
 Stop Prazhskaya
 Stop Biryulyovo Zapadnoye
 
+Bus 256: 6 stops on route, 5 unique stops, 5950 route length, 1.36124 curvature
+Bus 750: 7 stops on route, 3 unique stops, 27400 route length, 1.30853 curvature
+Bus 751: not found
+Stop Samara: not found
+Stop Prazhskaya: no buses
+Stop Biryulyovo Zapadnoye: buses 256 828
 //*/
 
-    int data_count, answer_count;
-    std::vector<std::string> data_requests;
-    std::vector<std::string> answer_requests;
-    std::string s;
-    std::cin >> data_count;
-    for (int i = 0; i < data_count+1; ++i)
-    {
-        getline(cin, s);
-        data_requests.push_back(move(s));
-    }
-    std::cin >> answer_count;
-    for (int i = 0; i < answer_count+1; ++i)
-    {
-        getline(cin, s);
-        answer_requests.push_back(move(s));
-    }
 
+    transport_catalogue::TransportCatalogue tc;
 
-    InputReader input_reader(data_requests, answer_requests);
-
-    transport_catalogue::TransportCatalogue tc(input_reader.CreateData(), input_reader.CreateDistances());
+    InputReader input_reader;
+    input_reader.FillTransportCatalogue(tc);
 
     StatReader stat_reader;
-    stat_reader.GetAnswers(tc, input_reader);
+    stat_reader.GetAnswers(tc);
 
     return 0;
 }

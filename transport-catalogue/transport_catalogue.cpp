@@ -2,40 +2,8 @@
 
 using namespace transport_catalogue;
 
-TransportCatalogue::TransportCatalogue(std::pair<std::vector<Stop>, std::vector<Bus>> stops_and_buses,
-	std::unordered_map<std::string, std::unordered_map<std::string, size_t>> distances_between_stops)
-{
-	empty_stop_ = new Stop();
-	empty_bus_ = new Bus();
-	for (auto& stop : stops_and_buses.first)
-	{
-		AddStop(stop);
-	}
-
-	for (auto& bus : stops_and_buses.second)
-	{
-		AddBus(bus);
-	}
-
-	for (auto& stop : distances_between_stops)
-	{
-		if (map_stops_.count(stop.first))
-		{
-			for (auto& other_stop : stop.second)
-			{
-				if (map_stops_.count(other_stop.first))
-				{
-					AddDistances(map_stops_.at(stop.first), map_stops_.at(other_stop.first), other_stop.second);
-				}
-			}
-		}
-	}
-}
-
 TransportCatalogue::~TransportCatalogue()
 {
-	delete empty_stop_;
-	delete empty_bus_;
 	while (!stops_.empty())
 	{
 		delete stops_.back();
@@ -50,8 +18,6 @@ TransportCatalogue::~TransportCatalogue()
 
 void TransportCatalogue::AddStop(const Stop& stop)
 {
-//	auto it = names_.insert(std::string(stop.name));
-//	std::string_view name_sv = *(it.first);
 	Stop* stop_tc = new Stop(stop);
 	stops_.push_back(stop_tc);
 	map_stops_[(*stop_tc).name] = stop_tc;
@@ -76,13 +42,13 @@ void TransportCatalogue::AddBus(const Bus& bus)
 	map_buses_[(*bus_tc).name] = bus_tc;
 }
 
-void TransportCatalogue::AddDistances(Stop* stop1, Stop* stop2, size_t distance)
+void TransportCatalogue::SetDistances(std::string_view from, std::string_view to, size_t distance)
 {
-	auto p = std::make_pair(stop1, stop2);
+	auto p = std::make_pair(map_stops_.at(from), map_stops_.at(to));
 	map_distances_[p] = distance;
 }
 
-const std::pair<bool, Bus&> TransportCatalogue::GetBusInfo(const std::string_view name)
+Bus* TransportCatalogue::GetBusInfo(const std::string_view name)
 {
 	if (map_buses_.count(name))
 	{
@@ -102,36 +68,35 @@ const std::pair<bool, Bus&> TransportCatalogue::GetBusInfo(const std::string_vie
 			? map_buses_.at(name)->road_distance / map_buses_.at(name)->geo_distance
 			: map_buses_.at(name)->curvature;
 			
-		return { true, *map_buses_.at(name) };
+		return map_buses_.at(name);
 	}
 	else
 	{
-		return { false, *empty_bus_ };
+		return nullptr;
 	}
 }
 
-const std::pair<bool, std::set<Bus*>> TransportCatalogue::GetStopInfo(const std::string_view name)
+std::set<Bus*>* TransportCatalogue::GetStopInfo(const std::string_view name)
 {
 	if (map_stops_.count(name))
 	{
-		std::set<Bus*> result;
+		std::set<Bus*>* result = new std::set<Bus*>({});
 		for (auto& bus : buses_)
 		{
 			int count = std::count_if(bus->route.begin(), bus->route.end(),
 				[name](const auto stop) { return stop->name == name; });
 			if (count)
 			{
-				result.insert(bus);
+				(*result).insert(bus);
 			}//*/
 		}
-		return { true, result };
+		return result;
 	}
 	else
 	{
-		return { false, {} };
+		return nullptr;
 	}
 }
-
 
 const Stop& TransportCatalogue::FindStop(const std::string_view name)
 {
@@ -142,7 +107,6 @@ const Bus& TransportCatalogue::FindBus(const std::string_view name)
 {
 	return *map_buses_.at(name);
 }
-
 
 std::deque<Stop*> TransportCatalogue::GetAllStops()
 {
@@ -196,4 +160,3 @@ int TransportCatalogue::CountRouteUniqueStops(const std::string_view name)
 	}
 	return unique_stops.size();
 }
-
