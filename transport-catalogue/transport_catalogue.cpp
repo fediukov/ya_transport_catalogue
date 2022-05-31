@@ -48,7 +48,7 @@ void TransportCatalogue::SetDistances(std::string_view from, std::string_view to
 	map_distances_[p] = distance;
 }
 
-Bus* TransportCatalogue::GetBusInfo(const std::string_view name)
+/*Bus* TransportCatalogue::GetBusInfo(const std::string_view name)
 {
 	if (map_buses_.count(name))
 	{
@@ -74,6 +74,20 @@ Bus* TransportCatalogue::GetBusInfo(const std::string_view name)
 	{
 		return nullptr;
 	}
+}//*/
+
+const BusStat TransportCatalogue::GetBusInfo(const std::string_view name)
+{
+	BusStat bus_stat;
+	if (map_buses_.count(name))
+	{
+		bus_stat.count_stops = (*map_buses_.at(name)).route.size();
+		bus_stat.unique_stops = CountRouteUniqueStops(name);
+		bus_stat.geo_distance = CalcGeoDistance(name);
+		bus_stat.road_distance = CalcRoadDistance(name);
+		bus_stat.curvature = bus_stat.road_distance / bus_stat.geo_distance;
+	}
+	return bus_stat;
 }
 
 std::set<Bus*>* TransportCatalogue::GetStopInfo(const std::string_view name)

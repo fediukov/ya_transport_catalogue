@@ -30,10 +30,19 @@ namespace transport_catalogue {
 
 		std::string name;
 		std::vector<Stop*> route;
+		/*double geo_distance = -1.;
+		double road_distance = -1.;
+		double curvature = -1.;
+		int unique_stops = -1;//*/
+	};
+
+	struct BusStat
+	{
+		int count_stops = -1;
+		int unique_stops = -1;
 		double geo_distance = -1.;
 		double road_distance = -1.;
 		double curvature = -1.;
-		int unique_stops = -1;
 	};
 
 
@@ -48,7 +57,8 @@ namespace transport_catalogue {
 		void SetDistances(std::string_view from, std::string_view to, size_t distance);
 
 		// get db parts
-		Bus* GetBusInfo(const std::string_view name);
+		//Bus* GetBusInfo(const std::string_view name);
+		const BusStat GetBusInfo(const std::string_view name);
 		std::set<Bus*>* GetStopInfo(const std::string_view name);
 		const Stop& FindStop(const std::string_view name);
 		const Bus& FindBus(const std::string_view name);

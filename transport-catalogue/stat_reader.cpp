@@ -21,7 +21,7 @@ void StatReader::GetAnswers(TransportCatalogue& tc)
 
 void StatReader::PrintBusInfo(TransportCatalogue& tc, const std::string_view name)
 {
-	Bus* bus = tc.GetBusInfo(name);
+	/*Bus* bus = tc.GetBusInfo(name);
 	if (bus != nullptr)
 	{
 		std::cout << "Bus " << bus->name << ": " << std::setprecision(6)
@@ -29,6 +29,19 @@ void StatReader::PrintBusInfo(TransportCatalogue& tc, const std::string_view nam
 			<< bus->unique_stops << " unique stops, "
 			<< bus->road_distance << " route length, "
 			<< bus->curvature << " curvature" << std::endl;
+	}
+	else
+	{
+		std::cout << "Bus " << name << ": not found" << std::endl;
+	}//*/
+	BusStat bus_stat = tc.GetBusInfo(name);
+	if (bus_stat.count_stops != -1)
+	{
+		std::cout << "Bus " << name << ": " << std::setprecision(6)
+			<< bus_stat.count_stops << " stops on route, "
+			<< bus_stat.unique_stops << " unique stops, "
+			<< bus_stat.road_distance << " route length, "
+			<< bus_stat.curvature << " curvature" << std::endl;
 	}
 	else
 	{
