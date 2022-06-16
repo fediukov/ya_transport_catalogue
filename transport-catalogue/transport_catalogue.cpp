@@ -1,6 +1,7 @@
 #include "transport_catalogue.h"
 
 using namespace transport_catalogue;
+using namespace domain;
 
 TransportCatalogue::~TransportCatalogue()
 {
@@ -47,34 +48,6 @@ void TransportCatalogue::SetDistances(std::string_view from, std::string_view to
 	auto p = std::make_pair(map_stops_.at(from), map_stops_.at(to));
 	map_distances_[p] = distance;
 }
-
-/*Bus* TransportCatalogue::GetBusInfo(const std::string_view name)
-{
-	if (map_buses_.count(name))
-	{
-		if (map_buses_.at(name)->geo_distance == -1)
-		{
-			map_buses_.at(name)->geo_distance = CalcGeoDistance(name);
-		}
-		if (map_buses_.at(name)->unique_stops == -1)
-		{
-			map_buses_.at(name)->unique_stops = CountRouteUniqueStops(name);
-		}
-		if (map_buses_.at(name)->road_distance == -1)
-		{
-			map_buses_.at(name)->road_distance = CalcRoadDistance(name);
-		}
-		map_buses_.at(name)->curvature = map_buses_.at(name)->curvature == -1
-			? map_buses_.at(name)->road_distance / map_buses_.at(name)->geo_distance
-			: map_buses_.at(name)->curvature;
-			
-		return map_buses_.at(name);
-	}
-	else
-	{
-		return nullptr;
-	}
-}//*/
 
 const BusStat TransportCatalogue::GetBusInfo(const std::string_view name)
 {
@@ -135,9 +108,9 @@ std::deque<Bus*> TransportCatalogue::GetAllBuses()
 double TransportCatalogue::CalcGeoDistance(const std::string_view name)
 {
 	double distance = 0.;
-	for (int i = 1; i < (*map_buses_.at(name)).route.size(); ++i)
+	for (size_t i = 1; i < (*map_buses_.at(name)).route.size(); ++i)
 	{
-		Coordinates from = (*map_buses_.at(name)).route[i - 1]->coordinates,
+		geo::Coordinates from = (*map_buses_.at(name)).route[i - 1]->coordinates,
 			to = (*map_buses_.at(name)).route[i]->coordinates;
 		distance += ComputeDistance(from, to);
 	}
@@ -147,7 +120,7 @@ double TransportCatalogue::CalcGeoDistance(const std::string_view name)
 double TransportCatalogue::CalcRoadDistance(const std::string_view name)
 {
 	double distance = 0.;
-	for (int i = 1; i < map_buses_.at(name)->route.size(); ++i)
+	for (size_t i = 1; i < map_buses_.at(name)->route.size(); ++i)
 	{
 		auto ptr_stop = map_buses_.at(name)->route.at(i - 1);
 		auto ptr_next_stop = map_buses_.at(name)->route.at(i);
