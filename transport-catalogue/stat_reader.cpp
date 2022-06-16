@@ -1,6 +1,7 @@
 #include "stat_reader.h"
 
 using namespace transport_catalogue;
+using namespace domain;
 
 void StatReader::GetAnswers(TransportCatalogue& tc)
 {

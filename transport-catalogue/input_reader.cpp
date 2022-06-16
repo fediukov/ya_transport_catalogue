@@ -48,7 +48,7 @@ void InputReader::SplitDataRequest(std::string& st)
 	if (st[0] == 'S' && st[1] == 't' && st[2] == 'o' && st[3] == 'p' && st[4] == ' ')
 	{
 		st = st.substr(5);
-		Stop stop = IsStopOfDataRequest(st);
+		domain::Stop stop = IsStopOfDataRequest(st);
 		stop_request_.push_back(stop);
 
 		// get distances to neighboring stops if they exist
@@ -61,9 +61,9 @@ void InputReader::SplitDataRequest(std::string& st)
 	}
 }
 
-Bus InputReader::IsBusOfDataRequest(std::string& st)
+domain::Bus InputReader::IsBusOfDataRequest(std::string& st)
 {
-	Bus bus;
+	domain::Bus bus;
 
 	// get name of bus
 	bus.name = move(GetNameOfRequest(st, ':'));
@@ -88,7 +88,7 @@ Bus InputReader::IsBusOfDataRequest(std::string& st)
 	// add stops
 	while (!st.empty())
 	{
-		Stop* stop = new Stop;
+		domain::Stop* stop = new domain::Stop;
 		stop->name = move(GetNameOfRequest(st, type_route));
 		if (!st.empty())
 		{
@@ -110,9 +110,9 @@ Bus InputReader::IsBusOfDataRequest(std::string& st)
 	return bus;
 }
 
-Stop InputReader::IsStopOfDataRequest(std::string& st)
+domain::Stop InputReader::IsStopOfDataRequest(std::string& st)
 {
-	Stop stop;
+	domain::Stop stop;
 
 	// get name of bus
 	stop.name = move(GetNameOfRequest(st, ':'));

@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "domain.h"
 #include "transport_catalogue.h"
 #include "input_reader.h"
 
