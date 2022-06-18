@@ -144,50 +144,16 @@ namespace svg {
     template <typename Owner>
     class PathProps {
     public:
-        Owner& SetFillColor(Color color) {
-            fill_color_ = std::move(color);
-            return AsOwner();
-        }
-        Owner& SetStrokeColor(Color color) {
-            stroke_color_ = std::move(color);
-            return AsOwner();
-        }
-        Owner& SetStrokeWidth(double width) {
-            width_ = width;
-            return AsOwner();
-        }
-        Owner& SetStrokeLineCap(StrokeLineCap line_cap) {
-            line_cap_ = line_cap;
-            return AsOwner();
-        }
-        Owner& SetStrokeLineJoin(StrokeLineJoin line_join) {
-            line_join_ = line_join;
-            return AsOwner();
-        }
+        Owner& SetFillColor(Color color);
+        Owner& SetStrokeColor(Color color);
+        Owner& SetStrokeWidth(double width);
+        Owner& SetStrokeLineCap(StrokeLineCap line_cap);
+        Owner& SetStrokeLineJoin(StrokeLineJoin line_join);
 
     protected:
         ~PathProps() = default;
 
-        void RenderAttrs(std::ostream& out) const {
-            using namespace std::literals;
-
-
-            if (fill_color_) {
-                out << " fill=\""sv << *fill_color_ << "\""sv;
-            }
-            if (stroke_color_) {
-                out << " stroke=\""sv << *stroke_color_ << "\""sv;
-            }
-            if (width_) {
-                out << " stroke-width=\""sv << *width_ << "\""sv;
-            }
-            if (line_cap_) {
-                out << " stroke-linecap=\""sv << *line_cap_ << "\""sv;
-            }
-            if (line_join_) {
-                out << " stroke-linejoin=\""sv << *line_join_ << "\""sv;
-            }
-        }
+        void RenderAttrs(std::ostream& out) const;
 
     private:
         Owner& AsOwner() {
@@ -310,5 +276,58 @@ namespace svg {
     private:
         std::vector<std::unique_ptr<Object>> objects_;
     };
+
+
+    // --- PathProps ------------------------------------------------------------------
+    // ----- methods ------------------------------------------------------------------
+    template <typename Owner>
+    Owner& PathProps<Owner>::SetFillColor(Color color) {
+        fill_color_ = std::move(color);
+        return AsOwner();
+    }
+
+    template <typename Owner>
+    Owner& PathProps<Owner>::SetStrokeColor(Color color) {
+        stroke_color_ = std::move(color);
+        return AsOwner();
+    }
+
+    template <typename Owner>
+    Owner& PathProps<Owner>::SetStrokeWidth(double width) {
+        width_ = width;
+        return AsOwner();
+    }
+    template <typename Owner>
+    Owner& PathProps<Owner>::SetStrokeLineCap(StrokeLineCap line_cap) {
+        line_cap_ = line_cap;
+        return AsOwner();
+    }
+    template <typename Owner>
+    Owner& PathProps<Owner>::SetStrokeLineJoin(StrokeLineJoin line_join) {
+        line_join_ = line_join;
+        return AsOwner();
+    }
+
+    template <typename Owner>
+    void PathProps<Owner>::RenderAttrs(std::ostream& out) const {
+        using namespace std::literals;
+
+
+        if (fill_color_) {
+            out << " fill=\""sv << *fill_color_ << "\""sv;
+        }
+        if (stroke_color_) {
+            out << " stroke=\""sv << *stroke_color_ << "\""sv;
+        }
+        if (width_) {
+            out << " stroke-width=\""sv << *width_ << "\""sv;
+        }
+        if (line_cap_) {
+            out << " stroke-linecap=\""sv << *line_cap_ << "\""sv;
+        }
+        if (line_join_) {
+            out << " stroke-linejoin=\""sv << *line_join_ << "\""sv;
+        }
+    }
 
 }  // namespace svg

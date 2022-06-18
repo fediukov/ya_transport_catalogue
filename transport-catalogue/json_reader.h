@@ -28,12 +28,21 @@ public:
         MapRenderer& mr);
 
 private:
-	// main functions
+    // main functions
     void ReadJson(std::istream& input);
-    std::ostream& GetTransportCatalogueData(
+    std::ostream& GetTransportCatalogueDataBus(
         std::ostream& out,
         transport_catalogue::TransportCatalogue& tc,
         json::Dict& request);
+    std::ostream& GetTransportCatalogueDataStop(
+        std::ostream& out,
+        transport_catalogue::TransportCatalogue& tc,
+        json::Dict& request);
+    std::ostream& GetJsonMap(std::ostream& out,
+        transport_catalogue::TransportCatalogue& tc,
+        MapRenderer& mr,
+        json::Dict& request);
+
 
     // secondary functions
     void ParseBaseRequests(json::Array& base_requests);
@@ -46,10 +55,10 @@ private:
     
 private:
     std::vector<domain::Bus> bus_request_;
-	std::vector<domain::Stop> stop_request_;
-	std::unordered_map<std::string, std::unordered_map<std::string, size_t>> distances_between_stops_;
+    std::vector<domain::Stop> stop_request_;
+    std::unordered_map<std::string, std::unordered_map<std::string, size_t>> distances_between_stops_;
 
-	std::vector<json::Dict> stat_requests_;
+    std::vector<json::Dict> stat_requests_;
 
     RenderSettings render_settings_;
 };
