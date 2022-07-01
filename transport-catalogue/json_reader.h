@@ -9,6 +9,7 @@
 #include "geo.h"
 #include "domain.h"
 #include "json.h"
+#include "json_builder.h"
 #include "map_renderer.h"
 #include "request_handler.h"
 #include "transport_catalogue.h"
@@ -22,18 +23,18 @@ public:
 
     void FillTransportCatalogue(std::istream& input, transport_catalogue::TransportCatalogue& tc);
     void ConnectMapRenderer(MapRenderer& mr);
-    std::ostream& GetStatRequest(
-        std::ostream& out,
+    void GetStatRequest(
+        std::ostream& out, 
         transport_catalogue::TransportCatalogue& tc,
         MapRenderer& mr);
 
 private:
-    // main functions
     void ReadJson(std::istream& input);
-    std::ostream& GetTransportCatalogueDataBus(
+    // version of out to ostraem
+    /*std::ostream& GetTransportCatalogueDataBus(
         std::ostream& out,
         transport_catalogue::TransportCatalogue& tc,
-        json::Dict& request);
+        json::Dict& request);//
     std::ostream& GetTransportCatalogueDataStop(
         std::ostream& out,
         transport_catalogue::TransportCatalogue& tc,
@@ -41,8 +42,19 @@ private:
     std::ostream& GetJsonMap(std::ostream& out,
         transport_catalogue::TransportCatalogue& tc,
         MapRenderer& mr,
-        json::Dict& request);
+        json::Dict& request);//*/
 
+    // version used json_builder
+    json::Dict GetTransportCatalogeBusNode(
+        transport_catalogue::TransportCatalogue& tc,
+        json::Dict& request);
+    json::Dict GetTransportCatalogeStopNode(
+        transport_catalogue::TransportCatalogue& tc,
+        json::Dict& request);
+    json::Dict GetJsonMapNode(
+        transport_catalogue::TransportCatalogue& tc,
+        MapRenderer& mr,
+        json::Dict& request);
 
     // secondary functions
     void ParseBaseRequests(json::Array& base_requests);

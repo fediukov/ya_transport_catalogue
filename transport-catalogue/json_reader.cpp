@@ -1,5 +1,8 @@
 #include "json_reader.h"
 
+
+using namespace std::string_literals;
+
 void JsonReader::FillTransportCatalogue(std::istream& input, transport_catalogue::TransportCatalogue& tc)
 {
 	ReadJson(input);
@@ -26,7 +29,35 @@ void JsonReader::ConnectMapRenderer(MapRenderer& mr)
 	mr.SetRenderSettings(render_settings_);
 }
 
-std::ostream& JsonReader::GetStatRequest(
+void JsonReader::GetStatRequest(
+	std::ostream& out,
+	transport_catalogue::TransportCatalogue& tc,
+	MapRenderer& mr)
+{
+	json::Array answers;
+	for (auto& request : stat_requests_)
+	{
+		if (request.at("type").AsString() == "Stop")
+		{
+			answers.push_back(GetTransportCatalogeStopNode(tc, request));
+		}
+		else if (request.at("type").AsString() == "Bus")
+		{
+			answers.push_back(GetTransportCatalogeBusNode(tc, request));
+		}
+		else if (request.at("type").AsString() == "Map")
+		{
+			answers.push_back(GetJsonMapNode(tc, mr, request));
+		}
+	}
+
+	json::Print(json::Document{json::Builder{}.Value(answers).Build()},	out);
+
+
+	//return out;
+}
+
+/*std::ostream& JsonReader::GetStatRequest(
 	std::ostream& out,
 	transport_catalogue::TransportCatalogue& tc,
 	MapRenderer& mr)
@@ -60,9 +91,9 @@ std::ostream& JsonReader::GetStatRequest(
 	}
 	out << "\n]\n";
 	return out;
-}
+}//*/
 
-std::ostream& JsonReader::GetTransportCatalogueDataBus(
+/*std::ostream& JsonReader::GetTransportCatalogueDataBus(
 	std::ostream& out,
 	transport_catalogue::TransportCatalogue& tc,
 	json::Dict& request)
@@ -82,9 +113,33 @@ std::ostream& JsonReader::GetTransportCatalogueDataBus(
 			<< '"' << "error_message" << '"' << ": " << '"' << "not found" << '"' << "\n";
 	}
 	return out;
+}//*/
+
+json::Dict JsonReader::GetTransportCatalogeBusNode(
+	transport_catalogue::TransportCatalogue& tc,
+	json::Dict& request)
+{
+	json::Dict result;
+
+	domain::BusStat bus_stat = tc.GetBusInfo(request.at("name").AsString());
+	if (bus_stat.count_stops != -1)
+	{
+		result.insert({ "curvature", bus_stat.curvature });
+		result.insert({ "request_id", request.at("id").AsInt() });
+		result.insert({ "route_length", bus_stat.road_distance });
+		result.insert({ "stop_count", bus_stat.count_stops });
+		result.insert({ "unique_stop_count", bus_stat.unique_stops });
+	}
+	else
+	{
+		result.insert({ "request_id", request.at("id").AsInt() });
+		result.insert({ "error_message", "not found"s });
+	}
+
+	return result;
 }
 
-std::ostream& JsonReader::GetTransportCatalogueDataStop(
+/*std::ostream& JsonReader::GetTransportCatalogueDataStop(
 	std::ostream& out,
 	transport_catalogue::TransportCatalogue& tc,
 	json::Dict& request)
@@ -102,7 +157,7 @@ std::ostream& JsonReader::GetTransportCatalogueDataStop(
 		for (auto bus : *stop)
 		{
 			bus_names.insert(bus->name);
-		}//*/
+		}//
 		bool first_bus = true;
 		for (const auto& name : bus_names)
 		{
@@ -121,9 +176,43 @@ std::ostream& JsonReader::GetTransportCatalogueDataStop(
 			<< '"' << "request_id" << '"' << ": " << request.at("id").AsInt() << "\n";
 	}
 	return out;
+}//*/
+
+json::Dict JsonReader::GetTransportCatalogeStopNode(
+	transport_catalogue::TransportCatalogue& tc,
+	json::Dict& request)
+{
+	json::Dict result;
+	
+	std::set<domain::Bus*>* stop = tc.GetStopInfo(request.at("name").AsString());
+	if (stop == nullptr)
+	{
+		result.insert({ "request_id", request.at("id").AsInt() });
+		result.insert({ "error_message", "not found"s });
+	}
+	else
+	{
+		// sorted buses
+		std::set<std::string> bus_names;
+		for (auto bus : *stop)
+		{
+			bus_names.insert(bus->name);
+		}
+
+		json::Array buses;
+		for (auto& bus_name : bus_names)
+		{
+			buses.push_back(bus_name);
+		}
+
+		result.insert({ "buses", buses });
+		result.insert({ "request_id", request.at("id").AsInt() });
+	}
+
+	return result;
 }
 
-std::ostream& JsonReader::GetJsonMap(std::ostream& out,
+/*std::ostream& JsonReader::GetJsonMap(std::ostream & out,
 	transport_catalogue::TransportCatalogue& tc,
 	MapRenderer& mr,
 	json::Dict& request)
@@ -161,16 +250,37 @@ std::ostream& JsonReader::GetJsonMap(std::ostream& out,
 	out << '"' << ",\n"
 		<< '"' << "request_id" << '"' << ": " << request.at("id").AsInt() << "\n";
 	return out;
+}//*/
+
+json::Dict JsonReader::GetJsonMapNode(
+	transport_catalogue::TransportCatalogue& tc,
+	MapRenderer& mr,
+	json::Dict& request)
+{
+	json::Dict result;
+	
+	std::ostringstream o;
+	mr.Draw(o, tc);
+	std::string map = o.str();
+	if (map.at(map.size() - 1) == '\n')
+	{
+		map.resize(map.size() - 1);
+	}
+	
+	result.insert({ "map" , map });
+	result.insert({ "request_id", request.at("id").AsInt() });
+
+	return result;
 }
 
 void JsonReader::ReadJson(std::istream& input)
 {
 	using namespace json;
 
-	Document doc;
-	doc = Load(input);
+	Document doc(Load(input));
+	//doc = Load(input);
 	// get types of requests and run through requests
-	Dict requests = doc.GetRoot().AsMap();
+	Dict requests = doc.GetRoot().AsDict();
 	for (const auto& [key, value] : requests)
 	{
 		if (key == "base_requests")
@@ -185,7 +295,7 @@ void JsonReader::ReadJson(std::istream& input)
 		}
 		else if (key == "render_settings")
 		{
-			Dict render_settings = value.AsMap();
+			Dict render_settings = value.AsDict();
 			ParseRenderSettings(render_settings);
 		}
 	}
@@ -197,12 +307,12 @@ void JsonReader::ParseBaseRequests(json::Array& base_requests)
 	for (const auto& base_request : base_requests)
 	{
 		// run through one of request
-		Dict request = base_request.AsMap();
+		Dict request = base_request.AsDict();
 		if (request.at("type").AsString() == "Stop")
 		{
 			stop_request_.push_back(ParseBaseRequestsOfStop(request));
 			// run through next stops to add distances
-			Dict distances = request.at("road_distances").AsMap();
+			Dict distances = request.at("road_distances").AsDict();
 			for (const auto& [next_stop, distance] : distances)
 			{
 				distances_between_stops_[request.at("name").AsString()][next_stop] = distance.AsDouble();
@@ -253,7 +363,7 @@ void JsonReader::ParseStatRequests(json::Array& stat_requests)
 {
 	for (const auto& stat_request : stat_requests)
 	{
-		stat_requests_.push_back(stat_request.AsMap());
+		stat_requests_.push_back(stat_request.AsDict());
 	}
 }
 
