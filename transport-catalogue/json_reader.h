@@ -13,6 +13,7 @@
 #include "map_renderer.h"
 #include "request_handler.h"
 #include "transport_catalogue.h"
+#include "transport_router.h"
 
 class RequestHandler;
 
@@ -24,27 +25,13 @@ public:
     void FillTransportCatalogue(std::istream& input, transport_catalogue::TransportCatalogue& tc);
     void ConnectMapRenderer(MapRenderer& mr);
     void GetStatRequest(
-        std::ostream& out, 
+        std::ostream& out,
         transport_catalogue::TransportCatalogue& tc,
         MapRenderer& mr);
 
 private:
     void ReadJson(std::istream& input);
-    // version of out to ostraem
-    /*std::ostream& GetTransportCatalogueDataBus(
-        std::ostream& out,
-        transport_catalogue::TransportCatalogue& tc,
-        json::Dict& request);//
-    std::ostream& GetTransportCatalogueDataStop(
-        std::ostream& out,
-        transport_catalogue::TransportCatalogue& tc,
-        json::Dict& request);
-    std::ostream& GetJsonMap(std::ostream& out,
-        transport_catalogue::TransportCatalogue& tc,
-        MapRenderer& mr,
-        json::Dict& request);//*/
 
-    // version used json_builder
     json::Dict GetTransportCatalogeBusNode(
         transport_catalogue::TransportCatalogue& tc,
         json::Dict& request);
@@ -55,6 +42,9 @@ private:
         transport_catalogue::TransportCatalogue& tc,
         MapRenderer& mr,
         json::Dict& request);
+    json::Dict GetTransportRouterNode(
+        //transport_catalogue::TransportCatalogue& tc,
+        json::Dict& request);
 
     // secondary functions
     void ParseBaseRequests(json::Array& base_requests);
@@ -64,7 +54,8 @@ private:
     void ParseRenderSettings(json::Dict& render_settings);
     std::vector<double>& ParseRenderSettingsArray(std::vector<double>& setting, json::Array& array);
     svg::Color& ParseRenderSettingsColor(svg::Color& setting, json::Node& array);
-    
+    void ParseRoutingSettings(json::Dict& routing_settings);
+
 private:
     std::vector<domain::Bus> bus_request_;
     std::vector<domain::Stop> stop_request_;
@@ -73,4 +64,7 @@ private:
     std::vector<json::Dict> stat_requests_;
 
     RenderSettings render_settings_;
+    RoutingSettings routing_settings_;
+
+    TransportRouter tr_;
 };
