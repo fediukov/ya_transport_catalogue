@@ -31,7 +31,6 @@ namespace transport_catalogue {
 		void SetDistances(std::string_view from, std::string_view to, size_t distance);
 
 		// get db parts
-		//Bus* GetBusInfo(const std::string_view name);
 		const domain::BusStat GetBusInfo(const std::string_view name);
 		std::set<domain::Bus*>* GetStopInfo(const std::string_view name);
 		const domain::Stop& FindStop(const std::string_view name);

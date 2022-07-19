@@ -10,6 +10,7 @@
 
 #include "domain.h"
 #include "router.h"
+//#include "transport_catalogue.h"
 
 struct RoutingSettings
 {
@@ -21,28 +22,19 @@ class TransportRouter {
 public:
 	// constructors
 	TransportRouter() = default;
-	/*TransportRouter(
-		const std::vector<domain::Bus>& buses,
-		const std::vector<domain::Stop>& stops,
-		const std::unordered_map<std::string, std::unordered_map<std::string, size_t>>& distances,
-		const RoutingSettings routing_settings
-	)
-	{
-		routing_settings_ = routing_settings;
-		SetGraph(buses, stops, distances);
-		router_ = std::make_unique<graph::Router<double>>(graph_);
-	}//*/
 
 	// operator()
 	TransportRouter& operator()(
 		const std::vector<domain::Bus>& buses,
 		const std::vector<domain::Stop>& stops,
-		const std::unordered_map<std::string, std::unordered_map<std::string, size_t>>& distances,
+		const std::unordered_map<std::string, std::unordered_map<std::string, size_t>>& distances,//*/
+		//const JsonReader& jr,
 		const RoutingSettings routing_settings
 		)
 	{
 		routing_settings_ = routing_settings;
 		SetGraph(buses, stops, distances);
+		//SetGraph(jr);
 		router_ = std::make_unique<graph::Router<double>>(graph_);
 		return *this;
 	}
@@ -63,8 +55,10 @@ private:
 	void SetGraph(
 		const std::vector<domain::Bus>& buses,
 		const std::vector<domain::Stop>& stops,
-		const std::unordered_map<std::string, std::unordered_map<std::string, size_t>>& distances
+		const std::unordered_map<std::string, std::unordered_map<std::string, size_t>>& distances//*/
 	);
+	void AddEdgesOfRoute(const domain::Bus& bus, size_t pos_from, size_t pos_to,
+		const std::unordered_map<std::string, std::unordered_map<std::string, size_t>>& distances);
 	double GetDistanceBetweenTwoStops(const std::string& from, const std::string& to,
 		const std::unordered_map<std::string, std::unordered_map<std::string, size_t>>& distances);
 
@@ -79,3 +73,4 @@ private:
 
 	RoutingSettings routing_settings_;
 };
+

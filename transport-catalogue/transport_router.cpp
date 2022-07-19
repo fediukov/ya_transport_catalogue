@@ -21,85 +21,46 @@ void TransportRouter::SetGraph(
 		double speed = routing_settings_.bus_velocity_ * 1000. / 60;
 		if (bus.round_route)
 		{
-			for (size_t i = 1; i < bus.route.size(); ++i)
-			{
-				for (size_t j = 0; j < i; ++j)
-				{
-					size_t distance = 0.;
-					double weight = routing_settings_.bus_wait_time_;
-					//
-					size_t vertex_id_from = name_id_of_stops_.at(bus.route.at(j)->name);
-					size_t vertex_id_to = name_id_of_stops_.at(bus.route.at(i)->name);
-
-					// look for a distance
-					for (size_t k = j + 1; k <= i; ++k)
-					{
-						distance += GetDistanceBetweenTwoStops(bus.route.at(k - 1)->name, bus.route.at(k)->name, distances);
-					}
-					// compute weight considering bus_wait_time
-					weight += (distance * 1. / speed);
-					// create edge
-					graph::Edge<double> edge = { vertex_id_from , vertex_id_to, weight };
-
-					size_t edge_id = graph_.AddEdge(edge);
-					id_name_of_buses_[edge_id] = bus.name;
-					id_count_of_stops[edge_id] = i - j;
-				}
-			}
+			// (bus, begin_pos, end_pos + 1, distances)
+			AddEdgesOfRoute(bus, 0, bus.route.size(), distances);
 		}
 		else // if (!bus.round_route)
 		{
-			// first half of route
-			for (size_t i = 1; i <= (bus.route.size() / 2); ++i)
+			// right direction of route
+			AddEdgesOfRoute(bus, 0, (bus.route.size() / 2) + 1, distances);
+			// back direction of route
+			AddEdgesOfRoute(bus, (bus.route.size() / 2), bus.route.size(), distances);
+		}
+	}
+}
+
+void TransportRouter::AddEdgesOfRoute(const domain::Bus& bus, size_t pos_from, size_t pos_to,
+	const std::unordered_map<std::string, std::unordered_map<std::string, size_t>>& distances)
+{
+	for (size_t i = pos_from + 1; i < pos_to; ++i)
+	{
+		for (size_t j = pos_from; j < i; ++j)
+		{
+			size_t distance = 0.;
+			double weight = routing_settings_.bus_wait_time_;
+			double speed = routing_settings_.bus_velocity_ * 1000. / 60;
+			//
+			size_t vertex_id_from = name_id_of_stops_.at(bus.route.at(j)->name);
+			size_t vertex_id_to = name_id_of_stops_.at(bus.route.at(i)->name);
+
+			// look for a distance
+			for (size_t k = j + 1; k <= i; ++k)
 			{
-				for (size_t j = 0; j < i; ++j)
-				{
-					size_t distance = 0.;
-					double weight = routing_settings_.bus_wait_time_;
-					//
-					size_t vertex_id_from = name_id_of_stops_.at(bus.route.at(j)->name);
-					size_t vertex_id_to = name_id_of_stops_.at(bus.route.at(i)->name);
-
-					// accumulate a distance
-					for (size_t k = j + 1; k <= i; ++k)
-					{
-						distance += GetDistanceBetweenTwoStops(bus.route.at(k - 1)->name, bus.route.at(k)->name, distances);
-					}
-					weight += (distance * 1. / speed);
-
-					graph::Edge<double> edge = { vertex_id_from , vertex_id_to, weight };
-
-					size_t edge_id = graph_.AddEdge(edge);
-					id_name_of_buses_[edge_id] = bus.name;
-					id_count_of_stops[edge_id] = i - j;
-				}
+				distance += GetDistanceBetweenTwoStops(bus.route.at(k - 1)->name, bus.route.at(k)->name, distances);
 			}
-			// second half of route
-			for (size_t i = (bus.route.size() / 2) + 1; i < bus.route.size(); ++i)
-			{
-				for (size_t j = (bus.route.size() / 2); j < i; ++j)
-				{
-					size_t distance = 0.;
-					double weight = routing_settings_.bus_wait_time_;
-					//
-					size_t vertex_id_from = name_id_of_stops_.at(bus.route.at(j)->name);
-					size_t vertex_id_to = name_id_of_stops_.at(bus.route.at(i)->name);
+			// compute weight considering bus_wait_time
+			weight += (distance * 1. / speed);
+			// create edge
+			graph::Edge<double> edge = { vertex_id_from , vertex_id_to, weight };
 
-					// look for a distance
-					for (size_t k = j + 1; k <= i; ++k)
-					{
-						distance += GetDistanceBetweenTwoStops(bus.route.at(k - 1)->name, bus.route.at(k)->name, distances);
-					}
-					// compute weight considering bus_wait_time
-					weight += (distance * 1. / speed);
-					// create edge
-					graph::Edge<double> edge = { vertex_id_from , vertex_id_to, weight };
-
-					size_t edge_id = graph_.AddEdge(edge);
-					id_name_of_buses_[edge_id] = bus.name;
-					id_count_of_stops[edge_id] = i - j;
-				}
-			}
+			size_t edge_id = graph_.AddEdge(edge);
+			id_name_of_buses_[edge_id] = bus.name;
+			id_count_of_stops[edge_id] = i - j;
 		}
 	}
 }
@@ -141,20 +102,6 @@ double TransportRouter::GetDistanceBetweenTwoStops(const std::string& from, cons
 				distance = (*it_to).second;
 			}
 		}
-	}//*/
-
-	// second option - slower
-	/*if (distances.count(from) && distances.at(from).count(to))
-	{
-		distance = distances.at(from).at(to);
-	}
-	else if (distances.count(to) && distances.at(to).count(from))
-	{
-		distance = distances.at(to).at(from);
-	}
-	else
-	{
-		distance = 0.;
 	}//*/
 
 	return distance;
