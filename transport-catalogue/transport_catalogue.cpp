@@ -90,6 +90,11 @@ const Stop& TransportCatalogue::FindStop(const std::string_view name)
 	return *map_stops_.at(name);
 }
 
+const Stop* TransportCatalogue::FindStopPtr(const std::string_view name)
+{
+	return map_stops_.at(name);
+}
+
 const Bus& TransportCatalogue::FindBus(const std::string_view name)
 {
 	return *map_buses_.at(name);
@@ -103,6 +108,18 @@ std::deque<Stop*> TransportCatalogue::GetAllStops()
 std::deque<Bus*> TransportCatalogue::GetAllBuses()
 {
 	return buses_;
+}
+
+std::unordered_map <std::string_view, std::unordered_map<std::string_view, size_t>> TransportCatalogue::GetAllDistances()
+{
+	std::unordered_map <std::string_view, std::unordered_map<std::string_view, size_t>> result;
+	for (const auto& [from_to, distance] : map_distances_)
+	{
+		std::string_view from = from_to.first->name;
+		std::string_view to = from_to.second->name;
+		result[from][to] = distance;
+	}
+	return result;
 }
 
 double TransportCatalogue::CalcGeoDistance(const std::string_view name)
@@ -120,19 +137,33 @@ double TransportCatalogue::CalcGeoDistance(const std::string_view name)
 double TransportCatalogue::CalcRoadDistance(const std::string_view name)
 {
 	double distance = 0.;
-	for (size_t i = 1; i < map_buses_.at(name)->route.size(); ++i)
+	if (!map_buses_.count(name))
 	{
-		auto ptr_stop = map_buses_.at(name)->route.at(i - 1);
-		auto ptr_next_stop = map_buses_.at(name)->route.at(i);
-		auto p = std::make_pair(ptr_stop, ptr_next_stop);
-		if (map_distances_.count(p))
+		distance = CalcGeoDistance(name);
+	}
+	else
+	{
+		for (size_t i = 1; i < map_buses_.at(name)->route.size(); ++i)
 		{
-			distance += map_distances_.at(p) * 1.;
-		}
-		else
-		{
-			p = std::make_pair(ptr_next_stop, ptr_stop);
-			distance += map_distances_.at(p) * 1.;
+			auto ptr_stop = map_buses_.at(name)->route.at(i - 1);
+			auto ptr_next_stop = map_buses_.at(name)->route.at(i);
+			auto p = std::make_pair(ptr_stop, ptr_next_stop);
+			if (map_distances_.count(p))
+			{
+				distance += map_distances_.at(p) * 1.;
+			}
+			else
+			{
+				p = std::make_pair(ptr_next_stop, ptr_stop);
+				if (!map_distances_.count(p))
+				{
+					distance = CalcGeoDistance(name);
+				}
+				else
+				{
+					distance += map_distances_.at(p) * 1.;
+				}
+			}
 		}
 	}
 	return distance;

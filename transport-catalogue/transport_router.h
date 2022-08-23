@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <map>
 #include <memory>
 #include <string>
@@ -27,15 +28,15 @@ public:
 	TransportRouter& operator()(
 		const std::vector<domain::Bus>& buses,
 		const std::vector<domain::Stop>& stops,
-		const std::unordered_map<std::string, std::unordered_map<std::string, size_t>>& distances,//*/
-		//const JsonReader& jr,
+		const std::unordered_map<std::string, std::unordered_map<std::string, size_t>>& distances,
 		const RoutingSettings routing_settings
 		)
 	{
 		routing_settings_ = routing_settings;
 		SetGraph(buses, stops, distances);
-		//SetGraph(jr);
-		router_ = std::make_unique<graph::Router<double>>(graph_);
+		SetRouter(graph_);
+		//router_ = std::make_unique<graph::Router<double>>(graph_);
+		//std::cout << "adress of router: " << router_ << " " << router_ << std::endl;
 		return *this;
 	}
 
@@ -50,6 +51,19 @@ public:
 	};
 
 	std::vector<RouterInfo> GetRoute(std::string stop_from, std::string stop_to);
+
+	// setters and getters of data
+	RoutingSettings GetRoutingSettings();
+	graph::DirectedWeightedGraph<double>& GetGraph();
+	std::unordered_map<std::string, size_t> GetNameIdOfStops();
+	std::unordered_map<size_t, std::string> GetIdNameOfBuses();
+	std::unordered_map<size_t, int> GetIdCountOfStops();
+
+	void SetRoutingSettings(RoutingSettings& rs);
+	void SetNameIdOfStop(std::string name, size_t id);
+	void SetIdNameOfBus(size_t id, std::string name);
+	void SetIdCountOfStop(size_t id, int count);
+	void SetRouter(graph::DirectedWeightedGraph<double>& graph);
 
 private:
 	void SetGraph(
@@ -66,9 +80,9 @@ private:
 	graph::DirectedWeightedGraph<double> graph_;
 	std::unique_ptr<graph::Router<double>> router_;
 
-	std::unordered_map<std::string_view, size_t> name_id_of_stops_;
-	std::unordered_map<size_t, std::string_view> id_name_of_stops_;
-	std::unordered_map<size_t, std::string_view> id_name_of_buses_;
+	std::unordered_map<std::string, size_t> name_id_of_stops_;
+	std::unordered_map<size_t, std::string> id_name_of_stops_;
+	std::unordered_map<size_t, std::string> id_name_of_buses_;
 	std::unordered_map<size_t, int> id_count_of_stops;
 
 	RoutingSettings routing_settings_;

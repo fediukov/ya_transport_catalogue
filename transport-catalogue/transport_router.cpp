@@ -157,3 +157,55 @@ std::vector<TransportRouter::RouterInfo> TransportRouter::GetRoute(std::string s
 
 	return result;
 }
+
+RoutingSettings TransportRouter::GetRoutingSettings()
+{
+	return routing_settings_;
+}
+
+graph::DirectedWeightedGraph<double>& TransportRouter::GetGraph()
+{
+	return graph_;
+}
+
+std::unordered_map<std::string, size_t> TransportRouter::GetNameIdOfStops()
+{
+	return name_id_of_stops_;
+}
+
+std::unordered_map<size_t, std::string> TransportRouter::GetIdNameOfBuses()
+{
+	return id_name_of_buses_;
+}
+
+std::unordered_map<size_t, int> TransportRouter::GetIdCountOfStops()
+{
+	return id_count_of_stops;
+}
+
+void TransportRouter::SetRoutingSettings(RoutingSettings& rs)
+{
+	routing_settings_.bus_wait_time_ = rs.bus_wait_time_;
+	routing_settings_.bus_velocity_ = rs.bus_velocity_;
+}
+
+void TransportRouter::SetNameIdOfStop(std::string name, size_t id)
+{
+	name_id_of_stops_[name] = id;
+	id_name_of_stops_[id] = name;
+}
+
+void TransportRouter::SetIdNameOfBus(size_t id, std::string name)
+{
+	id_name_of_buses_[id] = name;
+}
+
+void TransportRouter::SetIdCountOfStop(size_t id, int count)
+{
+	id_count_of_stops[id] = count;
+}
+
+void TransportRouter::SetRouter(graph::DirectedWeightedGraph<double>& graph)
+{
+	router_ = std::make_unique<graph::Router<double>>(graph);
+}

@@ -1,4 +1,4 @@
-﻿#include <cstdio>
+#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -8,165 +8,48 @@
 
 #include "json_reader.h"
 #include "map_renderer.h"
-#include "request_handler.h"
+//#include "request_handler.h"
+#include "serialization.h"
 #include "transport_catalogue.h"
-//#include "tests.h"
 
 using namespace std;
+using namespace std::literals;
 
-int main()
-{
-    //Test01(); // without json (using input_reader and stat_reader)
-    //Test02(); // json
-    //Test03(); // checking sphere projector
-
-    /*
-    */
-
-    transport_catalogue::TransportCatalogue tc;
-    JsonReader jr;
-    MapRenderer mr;
-
-    //std::ifstream file("input.json");
-    //std::istream& input = file;
-    //std::ofstream ofstr("output.json");
-    //jr.FillTransportCatalogue(input, tc);
-    jr.FillTransportCatalogue(std::cin, tc);
-    jr.ConnectMapRenderer(mr);
-    jr.GetStatRequest(std::cout, tc, mr);
-    //jr.GetStatRequest(ofstr, tc, mr);
-
-    //mr.Draw(std::cout, tc);
-
-    return 0;
+void PrintUsage(std::ostream& stream = std::cerr) {
+    stream << "Usage: transport_catalogue [make_base|process_requests]\n"sv;
 }
 
-/*
-  {
-      "base_requests": [
-          {
-              "is_roundtrip": true,
-              "name": "297",
-              "stops": [
-                  "Biryulyovo Zapadnoye",
-                  "Biryulyovo Tovarnaya",
-                  "Universam",
-                  "Biryulyovo Zapadnoye"
-              ],
-              "type": "Bus"
-          },
-          {
-              "is_roundtrip": false,
-              "name": "635",
-              "stops": [
-                  "Biryulyovo Tovarnaya",
-                  "Universam",
-                  "Prazhskaya"
-              ],
-              "type": "Bus"
-          },
-          {
-              "latitude": 55.574371,
-              "longitude": 37.6517,
-              "name": "Biryulyovo Zapadnoye",
-              "road_distances": {
-                  "Biryulyovo Tovarnaya": 2600
-              },
-              "type": "Stop"
-          },
-          {
-              "latitude": 55.587655,
-              "longitude": 37.645687,
-              "name": "Universam",
-              "road_distances": {
-                  "Biryulyovo Tovarnaya": 1380,
-                  "Biryulyovo Zapadnoye": 2500,
-                  "Prazhskaya": 4650
-              },
-              "type": "Stop"
-          },
-          {
-              "latitude": 55.592028,
-              "longitude": 37.653656,
-              "name": "Biryulyovo Tovarnaya",
-              "road_distances": {
-                  "Universam": 890
-              },
-              "type": "Stop"
-          },
-          {
-              "latitude": 55.611717,
-              "longitude": 37.603938,
-              "name": "Prazhskaya",
-              "road_distances": {},
-              "type": "Stop"
-          }
-      ],
-      "render_settings": {
-          "bus_label_font_size": 20,
-          "bus_label_offset": [
-              7,
-              15
-          ],
-          "color_palette": [
-              "green",
-              [
-                  255,
-                  160,
-                  0
-              ],
-              "red"
-          ],
-          "height": 200,
-          "line_width": 14,
-          "padding": 30,
-          "stop_label_font_size": 20,
-          "stop_label_offset": [
-              7,
-              -3
-          ],
-          "stop_radius": 5,
-          "underlayer_color": [
-              255,
-              255,
-              255,
-              0.85
-          ],
-          "underlayer_width": 3,
-          "width": 200
-      },
-      "routing_settings": {
-          "bus_velocity": 40,
-          "bus_wait_time": 6
-      },
-      "stat_requests": [
-          {
-              "id": 1,
-              "name": "297",
-              "type": "Bus"
-          },
-          {
-              "id": 2,
-              "name": "635",
-              "type": "Bus"
-          },
-          {
-              "id": 3,
-              "name": "Universam",
-              "type": "Stop"
-          },
-          {
-              "from": "Biryulyovo Zapadnoye",
-              "id": 4,
-              "to": "Universam",
-              "type": "Route"
-          },
-          {
-              "from": "Biryulyovo Zapadnoye",
-              "id": 5,
-              "to": "Prazhskaya",
-              "type": "Route"
-          }
-      ]
-  }
-*/
+int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        PrintUsage();
+        return 1;
+    }
+
+    const std::string_view mode(argv[1]);
+
+    if (mode == "make_base"sv)
+    {
+        transport_catalogue::TransportCatalogue tc;
+        JsonReader jr;
+        MapRenderer mr;
+        jr.FillTransportCatalogue(std::cin, tc);
+        jr.ConnectMapRenderer(mr);
+        serializer::Path file_path = std::filesystem::path(jr.GetSerializationSettings().at("file"));
+        serializer::Serialize(tc, mr, jr.GetTransportRouter(), file_path);
+    }
+    else if (mode == "process_requests"sv)
+    {
+        transport_catalogue::TransportCatalogue tc;
+        JsonReader jr;
+        MapRenderer mr;
+        jr.FillTransportCatalogue(std::cin, tc);
+        serializer::Path file_path = std::filesystem::path(jr.GetSerializationSettings().at("file"));
+        serializer::Deserialize(file_path, tc, mr, jr.GetTransportRouter());
+        jr.GetStatRequest(std::cout, tc, mr);
+    }
+    else
+    {
+        PrintUsage();
+        return 1;
+    }
+}

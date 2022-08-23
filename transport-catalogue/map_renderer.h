@@ -34,6 +34,7 @@ class MapRenderer {
 public:
     std::ostream& Draw(std::ostream& out, transport_catalogue::TransportCatalogue& tc);
     void SetRenderSettings(const RenderSettings& rc);
+    RenderSettings GetRenderSettings();
 
 private:
     void GetBuses(transport_catalogue::TransportCatalogue& tc);

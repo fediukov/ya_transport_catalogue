@@ -11,7 +11,7 @@
 #include "json.h"
 #include "json_builder.h"
 #include "map_renderer.h"
-#include "request_handler.h"
+//#include "request_handler.h"
 #include "transport_catalogue.h"
 #include "transport_router.h"
 
@@ -28,6 +28,11 @@ public:
         std::ostream& out,
         transport_catalogue::TransportCatalogue& tc,
         MapRenderer& mr);
+
+    TransportRouter& GetTransportRouter();
+    std::unordered_map<std::string, std::string> GetSerializationSettings();
+    RoutingSettings GetRoutingSettings();
+    void SetRoutingSettings(RoutingSettings& rs);
 
 private:
     void ReadJson(std::istream& input);
@@ -55,6 +60,7 @@ private:
     std::vector<double>& ParseRenderSettingsArray(std::vector<double>& setting, json::Array& array);
     svg::Color& ParseRenderSettingsColor(svg::Color& setting, json::Node& array);
     void ParseRoutingSettings(json::Dict& routing_settings);
+    void ParseSerializationSettings(json::Dict& serialization_settings);
 
 private:
     std::vector<domain::Bus> bus_request_;
@@ -65,6 +71,7 @@ private:
 
     RenderSettings render_settings_;
     RoutingSettings routing_settings_;
+    std::unordered_map<std::string, std::string> serialization_settings_;
 
     TransportRouter tr_;
 };

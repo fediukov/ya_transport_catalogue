@@ -63,6 +63,27 @@ void JsonReader::GetStatRequest(
 	json::Print(json::Document{ json::Builder{}.Value(answers).Build() }, out);
 }
 
+TransportRouter& JsonReader::GetTransportRouter()
+{
+	return tr_;
+}
+
+std::unordered_map<std::string, std::string> JsonReader::GetSerializationSettings()
+{
+	return serialization_settings_;
+}
+
+RoutingSettings JsonReader::GetRoutingSettings()
+{
+	return tr_.GetRoutingSettings();
+}
+
+void JsonReader::SetRoutingSettings(RoutingSettings& rs)
+{
+	routing_settings_.bus_wait_time_ = rs.bus_wait_time_;
+	routing_settings_.bus_velocity_ = rs.bus_velocity_;
+}
+
 json::Dict JsonReader::GetTransportCatalogeBusNode(
 	transport_catalogue::TransportCatalogue& tc,
 	json::Dict& request)
@@ -226,6 +247,11 @@ void JsonReader::ReadJson(std::istream& input)
 		{
 			Dict routing_settings = value.AsDict();
 			ParseRoutingSettings(routing_settings);
+		}
+		else if (key == "serialization_settings")
+		{
+			Dict serialization_settings = value.AsDict();
+			ParseSerializationSettings(serialization_settings);
 		}
 	}
 }
@@ -404,3 +430,10 @@ void JsonReader::ParseRoutingSettings(json::Dict& routing_settings)
 	}
 }
 
+void JsonReader::ParseSerializationSettings(json::Dict& serialization_settings)
+{
+	if (serialization_settings.count("file"))
+	{
+		serialization_settings_["file"] = serialization_settings.at("file").AsString();
+	}
+}

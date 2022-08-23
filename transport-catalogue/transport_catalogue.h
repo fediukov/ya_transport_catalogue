@@ -34,11 +34,13 @@ namespace transport_catalogue {
 		const domain::BusStat GetBusInfo(const std::string_view name);
 		std::set<domain::Bus*>* GetStopInfo(const std::string_view name);
 		const domain::Stop& FindStop(const std::string_view name);
+		const domain::Stop* FindStopPtr(const std::string_view name);
 		const domain::Bus& FindBus(const std::string_view name);
 
 		// my functions
 		std::deque<domain::Stop*> GetAllStops();
 		std::deque<domain::Bus*> GetAllBuses();
+		std::unordered_map <std::string_view, std::unordered_map<std::string_view, size_t>> GetAllDistances();
 
 	public:
 		struct PtrsHasher

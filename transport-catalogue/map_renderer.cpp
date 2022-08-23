@@ -13,6 +13,11 @@ void MapRenderer::SetRenderSettings(const RenderSettings& rc)
 	render_settings_ = rc;
 }
 
+RenderSettings MapRenderer::GetRenderSettings()
+{
+	return render_settings_;
+}
+
 void MapRenderer::GetBuses(transport_catalogue::TransportCatalogue& tc)
 {
 	for (const auto bus : tc.GetAllBuses())

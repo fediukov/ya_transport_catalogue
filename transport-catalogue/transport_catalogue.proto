@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package transport_catalogue_serialize;
+
+//import "graph.proto";
+import "map_renderer.proto";
+import "transport_router.proto";
+
+message Stop {
+    string name = 1;
+    double lat = 2;
+    double lng = 3;
+}
+
+message Bus {
+    string name = 1;
+    repeated string stop = 2;
+    bool is_round = 3;
+}
+
+message Distance {
+    string stop_from = 1;
+    string stop_to = 2;
+    double distance = 3;
+}
+
+message TransportCatalogue {
+    repeated Stop stops = 1;
+    repeated Bus buses = 2;
+    repeated Distance distances = 3;
+    RendererSettings render_settings = 4;
+    //RoutingSettings routing_settings = 5;
+    TransportRouter transport_router = 5;
+    //repeated Edge edges = 6;
+}
+
