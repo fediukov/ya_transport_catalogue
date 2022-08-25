@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package transport_catalogue_serialize;
 
-//import "graph.proto";
 import "map_renderer.proto";
 import "transport_router.proto";
 
@@ -28,9 +27,19 @@ message TransportCatalogue {
     repeated Stop stops = 1;
     repeated Bus buses = 2;
     repeated Distance distances = 3;
-    RendererSettings render_settings = 4;
-    //RoutingSettings routing_settings = 5;
-    TransportRouter transport_router = 5;
-    //repeated Edge edges = 6;
+}
+
+message MapRenderer {
+    RendererSettings render_settings = 1;
+}
+
+message Router {
+    TransportRouter transport_router = 1;
+}
+
+message Data {
+    TransportCatalogue transport_catalogue = 1;
+    MapRenderer map_renderer = 2;
+    Router router = 3;
 }
 
