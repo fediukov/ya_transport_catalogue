@@ -6,18 +6,18 @@
 
 Любые запросы к транспортному справочнику можно передать через JSON-файл.
 База данных транспортного справочника заполняется через запросы "base_requests" следующих типов:
-⋅⋅* "Bus"
+  * "Bus"
 Пример:
 ```
-  {
-    "is_roundtrip": false,
-    "name": "35",
-    "stops": [
-        "Gastello",
-        "TRK Piter"
-    ],
-    "type": "Bus"
-  }
+        {
+          "is_roundtrip": false,
+          "name": "35",
+          "stops": [
+              "Gastello",
+              "TRK Piter"
+          ],
+          "type": "Bus"
+        }
 ```
 
 Картинка:
