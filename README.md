@@ -49,19 +49,9 @@
         }
 ```
 
-
-
-    `Пример ответа:
+    Пример ответа:
     
-```
-        {
-            "curvature": 0.796523,
-            "request_id": 1,
-            "route_length": 10180,
-            "stop_count": 6,
-            "unique_stop_count": 5
-        }       
-```        
+
 
 Картинка:
 
