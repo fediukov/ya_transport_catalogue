@@ -1,0 +1,206 @@
+  {
+      "base_requests": [
+          {
+              "is_roundtrip": false,
+              "name": "35",
+              "stops": [
+                  "Gastello",
+                  "TRK Piter",
+                  "Tipanova",
+                  "Moskovskaia metro station",
+                  "Pochta",
+                  "Leninsky station"
+              ],
+              "type": "Bus"
+          },
+          {
+              "is_roundtrip": false,
+              "name": "43",
+              "stops": [
+                  "Pochta",
+                  "Gagarina",
+                  "TRK Piter",
+                  "Okey"
+              ],
+              "type": "Bus"
+          },
+          {
+              "is_roundtrip": true,
+              "name": "297",
+              "stops": [
+                  "Moskovskaia metro station",
+                  "Pobedy",
+                  "Tipanova",
+                  "Gagarina",
+                  "Chesmen chirch",
+                  "Moskovskaia metro station"
+              ],
+              "type": "Bus"
+          },
+          {
+              "latitude": 55.555871,
+              "longitude": 37.629656,
+              "name": "Pobedy",
+              "road_distances": {
+                   "Moskovskaia metro station": 1500,
+                   "Tipanova": 1600,
+              },
+              "type": "Stop"
+          },
+          {
+              "latitude": 55.609571,
+              "longitude": 37.65587,
+              "name": "Chesmen chirch",
+              "road_distances": {
+                   "Moskovskaia metro station": 2980,
+                   "Gagarina": 1500
+              },
+              "type": "Stop"
+          },
+          {
+              "latitude": 55.555871,
+              "longitude": 37.69087,
+              "name": "Gastello",
+              "road_distances": {
+                   "TRK Piter": 1500
+              },
+              "type": "Stop"
+          },
+          {
+              "latitude": 55.544371,
+              "longitude": 37.6817,
+              "name": "Okey",
+              "road_distances": {
+              },
+              "type": "Stop"
+          },
+          {
+              "latitude": 55.561371,
+              "longitude": 37.6717,
+              "name": "TRK Piter",
+              "road_distances": {
+                  "Okey": 2600,
+                  "Tipanova": 1500
+              },
+              "type": "Stop"
+          },
+          {
+              "latitude": 55.567371,
+              "longitude": 37.6517,
+              "name": "Tipanova",
+              "road_distances": {
+                  "Gagarina": 2600
+              },
+              "type": "Stop"
+          },
+          {
+              "latitude": 55.577655,
+              "longitude": 37.640687,
+              "name": "Moskovskaia metro station",
+              "road_distances": {
+                  "Gagarina": 1380,
+                  "Tipanova": 2500,
+                  "Pochta": 4650
+              },
+              "type": "Stop"
+          },
+          {
+              "latitude": 55.592028,
+              "longitude": 37.653656,
+              "name": "Gagarina",
+              "road_distances": {
+                  "Moskovskaia metro station": 890,
+                  "TRK Piter": 1800,
+                  "Pochta": 2180,
+              },
+              "type": "Stop"
+          },
+          {
+              "latitude": 55.601717,
+              "longitude": 37.623938,
+              "name": "Pochta",
+              "road_distances": {},
+              "type": "Stop"
+          }
+          {
+              "latitude": 55.611717,
+              "longitude": 37.603938,
+              "name": "Leninsky station",
+              "road_distances": {
+                  "Pochta": 750
+              },
+              "type": "Stop"
+          }
+
+      ],
+      "render_settings": {
+          "bus_label_font_size": 20,
+          "bus_label_offset": [
+              7,
+              15
+          ],
+          "color_palette": [
+              "green",
+              [
+                  255,
+                  160,
+                  0
+              ],
+              "brown"
+          ],
+          "height": 400,
+          "line_width": 14,
+          "padding": 30,
+          "stop_label_font_size": 20,
+          "stop_label_offset": [
+              7,
+              -3
+          ],
+          "stop_radius": 5,
+          "underlayer_color": [
+              255,
+              255,
+              255,
+              0.85
+          ],
+          "underlayer_width": 3,
+          "width": 400
+      },
+      "routing_settings": {
+          "bus_velocity": 40,
+          "bus_wait_time": 6
+      },
+      "stat_requests": [
+          {
+              "id": 1,
+              "name": "297",
+              "type": "Bus"
+          },
+          {
+              "id": 2,
+              "name": "35",
+              "type": "Bus"
+          },
+          {
+              "id": 3,
+              "name": "Moskovskaia metro station",
+              "type": "Stop"
+          },
+          {
+              "from": "Tipanova",
+              "id": 4,
+              "to": "Moskovskaia metro station",
+              "type": "Route"
+          },
+          {
+              "from": "Tipanova",
+              "id": 5,
+              "to": "Pochta",
+              "type": "Route"
+          },
+          {
+              "id": 6,
+              "type": "Map"
+          }
+      ]
+  }
